@@ -1,4 +1,4 @@
-﻿"use strict";
+"use strict";
 
 let currentUser = null;
 let currentRole = null;
@@ -61,14 +61,12 @@ function getDefaultAvatarPath(key) {
   return `/defaults/${String(key).replace(/[^a-z0-9_-]/gi, "").toLowerCase()}.png`;
 }
 
-// UPDATED: Now captures plain-text server errors instead of silently failing
 async function safeJson(res) {
   try {
     const text = await res.text();
     try {
       return JSON.parse(text);
     } catch (e) {
-      // If the server returns an HTML or plain text 400 error, wrap it in an object
       return { error: text.substring(0, 200) }; 
     }
   } catch (e) {
@@ -98,16 +96,27 @@ function handleUnauthorizedFromServer(message) {
 }
 
 async function authFetch(url, options = {}) {
-  options.headers = options.headers || {};
+  // Force strict JSON headers so the backend doesn't reject the body
+  options.headers = {
+    "Accept": "application/json",
+    "Content-Type": "application/json",
+    ...options.headers
+  };
 
   if (authToken) {
-    options.headers.Authorization = `Bearer ${authToken}`;
+    options.headers["Authorization"] = `Bearer ${authToken}`;
     options.headers["X-Auth-Token"] = authToken;
   }
 
   options.credentials = "include";
 
-  const res = await fetch(url, options);
+  let res;
+  try {
+    res = await fetch(url, options);
+  } catch (err) {
+    console.error("Network failure: Could not reach the server.", err);
+    throw err;
+  }
 
   if (res.status === 401) {
     const body = await safeJson(res);
@@ -235,6 +244,7 @@ async function register() {
       const fd = new FormData();
       fd.append("avatar", file);
 
+      // We use normal fetch here since it's multipart/form-data
       const upRes = await fetch("/upload-avatar", { method: "POST", body: fd });
       if (upRes.ok) {
         const upBody = await safeJson(upRes);
@@ -461,6 +471,7 @@ async function saveProfile() {
   if (avatarInput?.files?.[0]) {
     const fd = new FormData();
     fd.append("avatar", avatarInput.files[0]);
+    // Normal fetch for multipart
     const upRes = await fetch("/upload-avatar", { method: "POST", body: fd });
     if (upRes.ok) {
       const upBody = await safeJson(upRes);
@@ -487,7 +498,6 @@ async function saveProfile() {
 
   const res = await authFetch("/profile", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload)
   });
 
@@ -523,7 +533,6 @@ async function submitFeedback() {
   try {
     const res = await authFetch("/feedback", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ text })
     });
 
@@ -587,13 +596,14 @@ async function loadFeedbackAdmin() {
           ? ""
           : `<button onclick="markFeedbackRead(${f.id})" style="margin:0 8px 0 0; font-size:11px; padding:2px 6px;">Mark Read</button>`;
 
+        // EMAIL HIDDEN HERE
         return `
       <div class="${unreadClass}" style="padding:10px; background:#222; margin-bottom:8px; border-radius:6px; position:relative;">
         <div style="position:absolute; top:10px; right:10px;">
           ${markReadBtn}
           <button onclick="deleteFeedback(${f.id})" class="comment-delete-btn">Delete</button>
         </div>
-        <strong>${escapeHtml(f.displayName || "Unknown")}</strong> <span class="muted">(${escapeHtml(f.addedBy || "Unknown")})</span>
+        <strong>${escapeHtml(f.displayName || "Unknown")}</strong>
         <div style="margin-top:6px;">${escapeHtml(f.text)}</div>
       </div>
     `;
@@ -742,7 +752,6 @@ async function postComment(gameId) {
   try {
     const res = await authFetch("/comments", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ gameId, text })
     });
 
@@ -802,7 +811,6 @@ async function voteGame(gameId, targetVote, currentVote, gameTitle) {
     if (reason && reason.trim()) {
       await authFetch("/feedback", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ text: `[Dislike: ${gameTitle}]: ${reason}` })
       });
       updateAdminBadge();
@@ -811,7 +819,6 @@ async function voteGame(gameId, targetVote, currentVote, gameTitle) {
 
   await authFetch(`/games/${gameId}/vote`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ vote: finalVote })
   });
 
@@ -832,7 +839,16 @@ async function addGameFile() {
   fd.append("title", title);
 
   try {
-    const res = await authFetch("/games/upload", { method: "POST", body: fd });
+    // Normal fetch for multipart form data
+    const res = await fetch("/games/upload", {
+      method: "POST",
+      headers: authToken ? {
+        "Authorization": `Bearer ${authToken}`,
+        "X-Auth-Token": authToken
+      } : {},
+      body: fd
+    });
+    
     const body = await safeJson(res);
 
     if (res.ok) {
@@ -862,7 +878,6 @@ async function addGameUrl() {
   try {
     const res = await authFetch("/games/url", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ url, title })
     });
 
@@ -875,7 +890,6 @@ async function addGameUrl() {
       loadGames();
       alert("Game URL added successfully!");
     } else {
-      // The exact text output from your server 400 Bad request will display here now:
       showApiError("Server rejected the URL addition.", body);
     }
   } catch (e) {
