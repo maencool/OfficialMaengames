@@ -13,8 +13,10 @@ app.use(bodyParser.json());
 const SECRET = "officialmaen_super_secret_key_12345";
 
 function generateToken(email) {
-  const signature = crypto.createHmac('sha256', SECRET).update(email).digest('hex');
-  return `${email}.${signature}`;
+  // Convert email to Base64 to safely avoid periods/special characters
+  const b64Email = Buffer.from(email).toString('base64');
+  const signature = crypto.createHmac('sha256', SECRET).update(b64Email).digest('hex');
+  return `${b64Email}.${signature}`;
 }
 
 function verifyToken(token) {
@@ -22,9 +24,14 @@ function verifyToken(token) {
     if (!token) return null;
     const parts = token.split(".");
     if (parts.length !== 2) return null;
-    const [email, signature] = parts;
-    const expected = crypto.createHmac('sha256', SECRET).update(email).digest('hex');
-    if (signature === expected) return email;
+    
+    const [b64Email, signature] = parts;
+    const expected = crypto.createHmac('sha256', SECRET).update(b64Email).digest('hex');
+    
+    if (signature === expected) {
+      // Decode Base64 back to normal email
+      return Buffer.from(b64Email, 'base64').toString('utf8');
+    }
   } catch (e) {}
   return null;
 }
