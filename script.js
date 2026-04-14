@@ -537,7 +537,65 @@ async function submitFeedback() {
     });
 
     const body = await safeJson(res);
+// -------------------- Settings & Admin Users --------------------
 
+// 1. Auto-load the saved theme when the page opens
+(function initTheme() {
+  const saved = localStorage.getItem("om_theme") || "dark";
+  applyTheme(saved);
+})();
+
+// 2. Load profile info into the settings page
+function openSettingsInit() {
+  const nameEl = document.getElementById("settingsProfileName");
+  const emailEl = document.getElementById("settingsProfileEmail");
+  const thumbEl = document.getElementById("settingsProfileThumb");
+
+  // Show user details if logged in
+  if (currentUser) {
+    nameEl.textContent = currentUser;
+    emailEl.textContent = currentEmail || "";
+    if (currentAvatar) {
+      thumbEl.src = currentAvatar;
+      thumbEl.classList.remove("hidden");
+    } else {
+      thumbEl.classList.add("hidden");
+    }
+  } else {
+    nameEl.textContent = "Not logged in";
+    emailEl.textContent = "";
+    thumbEl.classList.add("hidden");
+  }
+
+  // Set the radio button to match the current theme
+  const savedTheme = localStorage.getItem("om_theme") || "dark";
+  if (savedTheme === "light") {
+    document.getElementById("themeLight").checked = true;
+  } else {
+    document.getElementById("themeDark").checked = true;
+  }
+}
+
+function applySelectedTheme() {
+  const isLight = document.getElementById("themeLight").checked;
+  const theme = isLight ? "light" : "dark";
+  localStorage.setItem("om_theme", theme);
+  applyTheme(theme);
+}
+
+function applyTheme(theme) {
+  if (theme === "light") {
+    document.body.classList.add("light-theme");
+  } else {
+    document.body.classList.remove("light-theme");
+  }
+}
+
+function resetTheme() {
+  localStorage.removeItem("om_theme");
+  document.getElementById("themeDark").checked = true;
+  applyTheme("dark");
+}
     if (res.ok) {
       alert("Feedback sent! Thank you.");
       textarea.value = "";
@@ -1009,3 +1067,5 @@ window.markFeedbackRead = markFeedbackRead;
 window.voteGame = voteGame;
 
 showPage("homePage");
+window.applySelectedTheme = applySelectedTheme;
+window.resetTheme = resetTheme;
