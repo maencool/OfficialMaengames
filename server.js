@@ -9,6 +9,26 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 app.use(bodyParser.json());
 
+// --- SECRET KEY FOR BULLETPROOF LOGINS ---
+const SECRET = "officialmaen_super_secret_key_12345";
+
+function generateToken(email) {
+  const signature = crypto.createHmac('sha256', SECRET).update(email).digest('hex');
+  return `${email}.${signature}`;
+}
+
+function verifyToken(token) {
+  try {
+    if (!token) return null;
+    const parts = token.split(".");
+    if (parts.length !== 2) return null;
+    const [email, signature] = parts;
+    const expected = crypto.createHmac('sha256', SECRET).update(email).digest('hex');
+    if (signature === expected) return email;
+  } catch (e) {}
+  return null;
+}
+
 // --- Local JSON Database Setup ---
 const dbPaths = {
   users: path.join(__dirname, "users.json"),
@@ -59,11 +79,16 @@ function requireAuth(req, res, next) {
     return res.status(401).json({ message: "Authentication required" });
   }
 
+  const email = verifyToken(token);
+  if (!email) {
+    return res.status(401).json({ message: "Session invalid. Please log in again." });
+  }
+
   const users = readDB("users");
-  const user = users.find((u) => u.token === token);
+  const user = users.find((u) => u.email === email);
 
   if (!user) {
-    return res.status(401).json({ message: "Session expired. Please log in again." });
+    return res.status(401).json({ message: "Account missing from database (Server Reset). Please register again." });
   }
 
   req.user = user;
@@ -127,11 +152,10 @@ app.post("/login", (req, res) => {
   // Force admin if it is your email
   if (email.toLowerCase() === "maencopra@gmail.com" && users[userIndex].role !== "admin") {
     users[userIndex].role = "admin";
+    writeDB("users", users);
   }
 
-  const token = crypto.randomBytes(24).toString("hex");
-  users[userIndex].token = token;
-  writeDB("users", users);
+  const token = generateToken(email);
 
   res.json({
     message: "Login successful",
@@ -143,24 +167,18 @@ app.post("/login", (req, res) => {
 });
 
 app.post("/logout", requireAuth, (req, res) => {
-  const users = readDB("users");
-  const userIndex = users.findIndex(u => u.id === req.user.id);
-  if (userIndex !== -1) {
-    users[userIndex].token = null;
-    writeDB("users", users);
-  }
   res.json({ message: "Logged out successfully" });
 });
 
 app.get("/profile", requireAuth, (req, res) => {
-  const { password, token, ...safeUser } = req.user;
+  const { password, ...safeUser } = req.user;
   res.json({ user: safeUser });
 });
 
 app.post("/profile", requireAuth, (req, res) => {
   const { displayName, avatarUrl, newPassword } = req.body;
   const users = readDB("users");
-  const userIndex = users.findIndex(u => u.id === req.user.id);
+  const userIndex = users.findIndex(u => u.email === req.user.email);
 
   if (userIndex !== -1) {
     if (displayName) users[userIndex].displayName = displayName;
@@ -169,7 +187,7 @@ app.post("/profile", requireAuth, (req, res) => {
     writeDB("users", users);
   }
 
-  const { password, token, ...safeUser } = users[userIndex] || req.user;
+  const { password, ...safeUser } = users[userIndex] || req.user;
   res.json({ message: "Profile updated", user: safeUser });
 });
 
@@ -248,11 +266,9 @@ app.post("/games/:id/vote", requireAuth, (req, res) => {
     if (!game.likes) game.likes = [];
     if (!game.dislikes) game.dislikes = [];
 
-    // Remove old vote
     game.likes = game.likes.filter(e => e !== req.user.email);
     game.dislikes = game.dislikes.filter(e => e !== req.user.email);
 
-    // Apply new vote
     if (vote === "like") game.likes.push(req.user.email);
     if (vote === "dislike") game.dislikes.push(req.user.email);
 
@@ -309,7 +325,6 @@ app.delete("/comments/:id", requireAuth, (req, res) => {
 // --- Feedback ---
 app.get("/feedback", requireAdmin, (req, res) => {
   const db = readDB("feedback");
-  // Sort newest first
   const feedback = (db.feedback || []).sort((a,b) => b.id - a.id);
   res.json({ feedback });
 });
