@@ -1,0 +1,20 @@
+{
+  "name": "officialmaengames",
+  "version": "1.0.0",
+  "description": "OfficialMaen Games web app",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.103.0",
+    "body-parser": "^1.20.4",
+    "dotenv": "^17.4.1",
+    "express": "^4.22.1",
+    "multer": "^2.1.1"
+  },
+  "keywords": [],
+  "author": "OfficialMaen",
+  "license": "ISC",
+  "type": "commonjs"
+}

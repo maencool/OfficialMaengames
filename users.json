@@ -1,0 +1,17 @@
+[
+  {
+    "email": "maencopra@gmail.com",
+    "displayName": "OfficialMaen",
+    "password": "maenisnotuglyheiscool12345",
+    "role": "admin",
+    "avatarUrl": "/uploads/1775888235545-984990089.jpg",
+    "token": "5b5814ecca18a6b94e1ed357399a38572b2166ea21dc4988"
+  },
+  {
+    "email": "randomguy@gmail.com",
+    "displayName": "Test",
+    "password": "12345guy",
+    "role": "user",
+    "avatarUrl": "/defaults/cat.png"
+  }
+]

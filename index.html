@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>OfficialMaen Games</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- Added position: relative to header to hold the top-right badge -->
+  <header style="position: relative;">
+    
+    <!-- Top Right User Badge -->
+    <div id="userInfo" class="hidden" style="position: absolute; top: 16px; right: 16px; display: flex; align-items: center; gap: 8px; background: #222; padding: 6px 12px; border-radius: 30px; border: 1px solid #444; font-size: 14px;"></div>
+
+    <div style="display:flex;align-items:center;justify-content:center;gap:12px;">
+      <div style="width:36px;height:36px;border-radius:8px;background:#6b5cff;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:bold;">OM</div>
+      <h1 style="margin:0;">OfficialMaen Games</h1>
+    </div>
+    
+    <nav style="margin-top:16px;">
+      <button id="homeBtn" onclick="showPage('homePage')">Home</button>
+      <button id="profileBtn" onclick="openProfile()" class="hidden">Profile</button>
+      <button id="feedbackNavBtn" onclick="showPage('feedbackPage')" class="hidden">Feedback</button>
+      <button id="settingsBtn" onclick="showPage('settingsPage')">Settings</button>
+      <button id="adminBtn" onclick="openAdminPanel()" class="hidden">Admin Panel <span id="adminBadge" class="badge hidden">0</span></button>
+      <button id="loginBtn" onclick="showPage('loginPage')">Login</button>
+      <button id="registerBtn" onclick="showPage('registerPage')">Register</button>
+      <button id="logoutBtn" onclick="logout()" class="hidden">Logout</button>
+    </nav>
+  </header>
+
+  <main>
+    <!-- Home -->
+    <section id="homePage">
+      <h2>Welcome</h2>
+      <p>Use the Login or Register buttons to continue.</p>
+      <div id="gamesGrid" class="profile-box" style="text-align:left;max-width:900px;margin:1rem auto;">
+        <h3>Games Library</h3>
+        <div id="gamesList">Loading games...</div>
+      </div>
+    </section>
+
+    <!-- Feedback Page -->
+    <section id="feedbackPage" class="hidden">
+      <h2>Send Feedback</h2>
+      <p>Found a bug or have an idea? Let us know!</p>
+      <div class="profile-box">
+        <textarea id="feedbackText" rows="5" placeholder="Write your feedback here..."></textarea>
+        <button onclick="submitFeedback()">Submit Feedback</button>
+      </div>
+    </section>
+
+    <!-- Login -->
+    <section id="loginPage" class="hidden">
+      <h2>Login</h2>
+      <input id="loginEmail" placeholder="Email" />
+      <input id="loginPass" type="password" placeholder="Password" />
+      <div id="loginError" class="error hidden"></div>
+      <button onclick="login()">Login</button>
+    </section>
+
+    <!-- Register -->
+    <section id="registerPage" class="hidden">
+      <h2>Register</h2>
+      <input id="registerEmail" placeholder="Email" />
+      <input id="registerDisplay" placeholder="Display name" />
+      <input id="registerPass" type="password" placeholder="Password" />
+      <div id="registerError" class="error hidden"></div>
+      <button onclick="register()">Register</button>
+    </section>
+
+    <!-- Profile -->
+    <section id="profilePage" class="hidden">
+      <h2>Profile</h2>
+      <div id="profileInfo" class="profile-box"></div>
+      <button onclick="openEditProfile()">Edit Profile</button>
+    </section>
+
+    <!-- Edit Profile -->
+    <section id="editProfilePage" class="hidden">
+      <h2>Edit Profile</h2>
+      <div class="profile-edit">
+        <label>Display name</label>
+        <input id="editDisplay" />
+        <label>New password (leave blank to keep)</label>
+        <input id="editNewPass" type="password" />
+        <label>Choose default avatar</label>
+        <select id="defaultAvatarEditSelect">
+          <option value="none">None</option>
+          <option value="cat">Cat</option>
+          <option value="robot">Robot</option>
+        </select>
+        <label>Or upload avatar</label>
+        <input id="editAvatar" type="file" accept="image/png,image/jpeg" />
+        <img id="editAvatarPreview" class="hidden profile-thumb" />
+        <div id="editProfileError" class="error hidden"></div>
+        <button onclick="saveProfile()">Save</button>
+      </div>
+    </section>
+
+    <!-- Settings -->
+    <section id="settingsPage" class="hidden">
+      <h2>Settings</h2>
+      <div class="settings-section">
+        <div class="profile-preview">
+          <img id="settingsProfileThumb" class="profile-thumb hidden" />
+          <div>
+            <div id="settingsProfileName">Not logged in</div>
+            <div id="settingsProfileEmail" class="muted"></div>
+          </div>
+        </div>
+        <div style="margin-top:12px;">
+          <label><input type="radio" name="theme" id="themeDark" value="dark" checked /> Dark</label>
+          <label><input type="radio" name="theme" id="themeLight" value="light" /> Light</label>
+          <div style="margin-top:8px;">
+            <button onclick="applySelectedTheme()">Apply Theme</button>
+            <button onclick="resetTheme()">Reset Theme</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Admin Panel -->
+    <section id="adminPanel" class="hidden">
+      <h2>Admin Panel</h2>
+      <div class="profile-box">
+        <h3>Add Game (file)</h3>
+        <input id="gameTitle" placeholder="Game Title" />
+        <input id="gameFile" type="file" />
+        <button onclick="addGameFile()">Upload Game File</button>
+
+        <h3 style="margin-top:12px;">Add Game (URL)</h3>
+        <input id="gameTitleUrl" placeholder="Game Title (URL)" />
+        <input id="gameUrl" placeholder="Game URL (e.g. Scratch embed URL)" />
+        <button onclick="addGameUrl()">Add Game by URL</button>
+
+        <h3 style="margin-top:12px;">Games List</h3>
+        <div id="gamesListAdmin"></div>
+
+        <h3 style="margin-top:12px;">User Feedback & Dislike Reasons</h3>
+        <div id="feedbackListAdmin"></div>
+
+        <h3 style="margin-top:12px;">User Management</h3>
+        <input id="deleteEmail" placeholder="Email to delete" />
+        <button onclick="deleteUser()">Delete User</button>
+      </div>
+    </section>
+  </main>
+
+  <footer style="text-align:center;padding:1rem;">
+    <small>© 2026 OfficialMaen Games</small>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

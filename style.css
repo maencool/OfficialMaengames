@@ -1,0 +1,103 @@
+:root {
+  --bg-dark: #121212;
+  --panel-dark: #161616;
+  --text-light: #ffffff;
+  --muted: #bbb;
+  --accent: #6b5cff;
+}
+
+* { box-sizing: border-box; }
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  background: var(--bg-dark);
+  color: var(--text-light);
+  min-height: 100vh;
+}
+
+header {
+  background: #1f1f1f;
+  padding: 1rem;
+  text-align: center;
+}
+
+nav {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+nav button {
+  margin: 0 0.25rem;
+  padding: 0.45rem 0.9rem;
+  background: #333;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  border-radius: 6px;
+  position: relative;
+}
+
+nav button:hover { background: #555; }
+
+.hidden { display: none !important; }
+
+main { padding: 1.5rem; text-align: center; }
+
+input, select, textarea {
+  display: block;
+  margin: 0.5rem auto;
+  padding: 0.5rem;
+  width: 280px;
+  border-radius: 6px;
+  border: 1px solid #444;
+  background: #222;
+  color: #fff;
+  font-family: inherit;
+}
+textarea { width: 100%; max-width: 100%; resize: vertical; }
+
+button { margin: 0.5rem; padding: 0.5rem 1rem; background: #333; color: #fff; border: none; border-radius: 6px; cursor: pointer; }
+button:hover { background: #555; }
+
+.error { color: #ff6b6b; margin-top: 0.5rem; }
+
+.profile-box, .profile-edit, .settings-section {
+  margin: 0.75rem auto;
+  max-width: 720px;
+  text-align: left;
+  background: var(--panel-dark);
+  padding: 1rem;
+  border-radius: 8px;
+  border: 1px solid #2a2a2a;
+}
+
+.profile-preview { display:flex; align-items:center; gap:12px; }
+.profile-thumb { width:56px; height:56px; border-radius:50%; object-fit:cover; border:2px solid #333; display:block; margin:0.5rem auto; }
+.muted { color: var(--muted); font-size: 0.9rem; }
+
+.user-item { padding: 0.4rem 0; border-bottom: 1px solid #222; }
+.user-admin { color: yellow; font-weight: bold; }
+
+/* Comment & Vote Styling */
+.comment-item { display: flex; gap: 10px; padding: 10px 0; border-bottom: 1px solid #333; }
+.comment-avatar { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; background: #444; }
+.comment-text { margin-top: 4px; line-height: 1.4; }
+.comment-date { font-size: 11px; color: var(--muted); margin-left: 8px; }
+.comment-delete-btn { font-size: 11px; padding: 2px 6px; margin: 0; background: #e74c3c; border-radius: 4px; float: right; }
+
+.vote-btn { background: #222; padding: 6px 12px; border: 1px solid #444; border-radius: 6px; margin: 0 4px 0 0; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+.vote-btn:hover { background: #333; }
+.vote-active-like { background: #2ecc71 !important; border-color: #27ae60 !important; color: #fff; }
+.vote-active-dislike { background: #e74c3c !important; border-color: #c0392b !important; color: #fff; }
+
+/* Admin Notifications */
+.badge { background: #e74c3c; color: white; border-radius: 50%; padding: 2px 6px; font-size: 11px; font-weight: bold; vertical-align: top; margin-left: 4px; display: inline-block; }
+.feedback-unread { border-left: 4px solid #e74c3c; }
+
+@media (max-width: 520px) {
+  input, select { width: 90%; }
+  .profile-box, .settings-section { padding: 0.75rem; }
+}
