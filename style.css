@@ -101,3 +101,58 @@ button:hover { background: #555; }
   input, select { width: 90%; }
   .profile-box, .settings-section { padding: 0.75rem; }
 }
+/* =========================================
+   LIGHT THEME OVERRIDES
+   ========================================= */
+body.light-theme {
+  background: #f4f5f7;
+  color: #111;
+}
+
+body.light-theme header {
+  background: #ffffff;
+  border-bottom: 1px solid #ddd;
+}
+
+body.light-theme nav button {
+  background: #e0e0e0;
+  color: #111;
+}
+
+body.light-theme nav button:hover {
+  background: #ccc;
+}
+
+body.light-theme .profile-box, 
+body.light-theme .profile-edit, 
+body.light-theme .settings-section {
+  background: #ffffff;
+  border: 1px solid #ccc;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+body.light-theme input, 
+body.light-theme select, 
+body.light-theme textarea {
+  background: #fff;
+  color: #111;
+  border: 1px solid #aaa;
+}
+
+body.light-theme button {
+  background: #e0e0e0;
+  color: #111;
+  border: 1px solid #ccc;
+}
+
+body.light-theme button:hover {
+  background: #d0d0d0;
+}
+
+/* Fixes for dark colors injected via JS */
+body.light-theme [style*="background:#1e1e1e"] { background: #fff !important; border: 1px solid #ddd !important; }
+body.light-theme [style*="background:#111"] { background: #f9f9f9 !important; border: 1px solid #ccc !important; }
+body.light-theme [style*="background:#222"] { background: #f0f0f0 !important; border: 1px solid #ccc !important; }
+body.light-theme .comment-item { border-bottom: 1px solid #ddd; }
+body.light-theme .vote-btn { background: #eee !important; border-color: #ccc !important; color:#111; }
+body.light-theme .user-item { border-bottom: 1px solid #ddd; }
